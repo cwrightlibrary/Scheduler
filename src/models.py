@@ -36,6 +36,22 @@ class Employee(BaseModel):
     position: PositionType
     experience: int | None
 
+    @property
+    def first_name(self) -> str:
+        return self.name.split()[0]
+
+    @property
+    def last_name(self) -> str:
+        return self.name.split()[-1]
+
+    @property
+    def initials(self) -> str:
+        return "".join([i[0] for i in self.name.replace("-", " ").split()])
+
+    @property
+    def sharepoint(self) -> str:
+        return f"{self.first_name[0]}{self.last_name}"
+
 
 class Location(BaseModel):
     """
@@ -52,7 +68,7 @@ class Location(BaseModel):
     name: str
     required: bool = True
     num_employees: int = Field(ge=0, default=0)
-    assigned: dict[datetime, list[Employee]] = Field(default_factory=dict)
+    assigned: dict[tuple[datetime, datetime], list[Employee]] = Field(default_factory=dict)
 
 
 class Template(BaseModel):
