@@ -1,10 +1,16 @@
-import src.models as md
+import streamlit as st
 
 
 def main():
-    chris = md.Employee(name="Chris Wright", position="full-time", experience=84)
-    jess = md.Employee(name="Jess Bryant", position="full-time", experience=112)
-    lindsey = md.Employee(name="Lindsey Taunton", position="supervisor", experience=121)
+    if "employees" not in st.session_state:
+        st.session_state.employees = []
+
+    with st.form(border=True, key="employee_form"):
+        st.header("Add employee")
+        st.text_input("Full name")
+
+        st.form_submit_button("Add")
+        st.rerun()
 
 
 if __name__ == "__main__":

@@ -1,91 +1,40 @@
-import uuid
-from datetime import datetime
-from typing import Literal
-
-from pydantic import BaseModel, Field
-
-PositionType = Literal[
-    "manager",
-    "assistant-manager",
-    "supervisor",
-    "full-time",
-    "part-time",
-    "security-full-time",
-    "security-part-time",
-    "shelver",
-]
-
-WeekdayName = Literal[
-    "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
-]
+from dataclasses import dataclass, field
 
 
-class Employee(BaseModel):
-    """
-    The employee object to be used with all other classes.
-
-    Args:
-        id (uuid4): The generated employee ID
-        name (str): The full name of the employee, e.g. *"Chris Wright"*
-        position (PositionType): The employee's position for getting their rank
-        experience (int): Number of months worked, only applicable to full-time workers
-    """
-
-    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+@dataclass
+class Employee:
     name: str
-    position: PositionType
-    experience: int | None
-
-    @property
-    def first_name(self) -> str:
-        return self.name.split()[0]
-
-    @property
-    def last_name(self) -> str:
-        return self.name.split()[-1]
-
-    @property
-    def initials(self) -> str:
-        return "".join([i[0] for i in self.name.replace("-", " ").split()])
-
-    @property
-    def sharepoint(self) -> str:
-        return f"{self.first_name[0]}{self.last_name}"
 
 
-class Location(BaseModel):
-    """
-    A location to which employees are assigned to work.
-
-    Args:
-        id (uuid4): The generated location ID
-        name (str): The name of the location, e.g. *"Service Pt. 1"* or *"Floor Lead"*
-        required (bool): If this location must be staffed
-        assigned (dict[datetime, list[Employee]]): A dictionary of datetime objects for daily shift segments with a list of Employees at each shift
-    """
-
-    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+@dataclass
+class Location:
     name: str
     required: bool = True
-    num_employees: int = Field(ge=0, default=0)
-    assigned: dict[tuple[datetime, datetime], list[Employee]] = Field(default_factory=dict)
+    employees: list[Employee] = field(default_factory=list)
+    min_staff: int = 1
+
+    def add_employee(self, employee: Employee) -> None:
+        if employee not in self.employees:
+            self.employees.append(employee)
+
+    def remove_employee(self, employee: Employee) -> None:
+        if employee in self.employees:
+            self.employees.remove(employee)
+
+    def is_empty(self) -> bool:
+        return len(self.employees) == 0
+
+    def needs_staff(self) -> bool:
+        return len(self.employees) < self.min_staff
 
 
-class Template(BaseModel):
-    """
-    The template object that ties the `Employee` and `Location` classes together.
+@dataclass
+class TimeSlot:
+    start_time: int
+    end_time: int
+    locations: dict[str, Location] = field(default_factory=dict)
 
-    Args:
-        id (uuid4): The generated template ID
-        weekday (WeekdayName): The name of the weekday
-        alternate (int): The alternate schedule for this template for use with certain days that have alternating/rotating employees
-        employees (dict[tuple[datetime, datetime], list[Employee]]): An dictionary where the keys are working hours for an employee and the value is a list of employees
-        locations (dict[str, Location]): Each location sorted as a dictionary by the location's name
-    """
-
-    id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    weekday: WeekdayName
-    alternate: int = Field(ge=0, default=0)
-    operating_hours: tuple[datetime, datetime]
-    employees: dict[tuple[datetime, datetime], list[Employee]]
-    locations: dict[str, Location]
+    def get_time_label(self) -> str:
+        t1 = self.start_time - 12 if self.start_time > 12 else self.start_time
+        t2 = self.end_time - 12 if self.end_time > 12 else self.end_time
+        return f"{t1}-{t2}"
