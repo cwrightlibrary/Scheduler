@@ -147,7 +147,39 @@ def main():
             st.header("Setup hours")
 
             hours_df = pd.DataFrame(
-                [{"weekday": "Sunday", "open": time(14, 0), "close": time(18, 0)}]
+                [
+                    {"weekday": "Sunday", "open": time(14, 0), "close": time(18, 0)},
+                    {"weekday": "Monday", "open": time(9, 0), "close": time(20, 0)},
+                    {"weekday": "Tuesday", "open": time(9, 0), "close": time(20, 0)},
+                    {"weekday": "Wednesday", "open": time(9, 0), "close": time(20, 0)},
+                    {"weekday": "Thursday", "open": time(9, 0), "close": time(20, 0)},
+                    {"weekday": "Friday", "open": time(9, 0), "close": time(20, 0)},
+                    {"weekday": "Saturday", "open": time(9, 0), "close": time(20, 0)},
+                ]
+            )
+
+            hours_editor = st.data_editor(
+                hours_df,
+                column_config={
+                    "weekday": st.column_config.TextColumn(
+                        disabled=True,
+                    ),
+                    "open": st.column_config.TimeColumn(
+                        "Open",
+                        min_value=time(8, 0),
+                        max_value=time(20, 0),
+                        format="hh:mm a",
+                        step=15,
+                    ),
+                    "close": st.column_config.TimeColumn(
+                        "Close",
+                        min_value=time(8, 0),
+                        max_value=time(20, 0),
+                        format="hh:mm a",
+                        step=15,
+                    ),
+                },
+                hide_index=True,
             )
 
             if st.form_submit_button("Save", type="primary"):
