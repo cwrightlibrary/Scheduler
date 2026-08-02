@@ -4,18 +4,45 @@ from dataclasses import dataclass, field
 @dataclass
 class Employee:
     name: str
+    position: str
+    experience: int
+
+    @property
+    def first_name(self) -> str:
+        return self.name.split()[0]
+
+    @property
+    def last_name(self) -> str:
+        return self.name.split()[1]
+
+    @property
+    def initials(self) -> str:
+        return "".join([i[0] for i in self.name.replace("-", " ").split()])
+
+    @property
+    def sharepoint(self) -> str:
+        return f"{self.first_name[0]}{self.last_name}"
 
 
 @dataclass
 class Location:
     name: str
-    required: bool = True
     employees: list[Employee] = field(default_factory=list)
     min_staff: int = 1
 
-    def add_employee(self, employee: Employee) -> None:
+    def append_employee(self, employee: Employee) -> None:
         if employee not in self.employees:
             self.employees.append(employee)
+        elif self.employees[0] == employee and len(self.employees) > 1:
+            self.employees.remove(employee)
+            self.employees.append(employee)
+
+    def insert_employee(self, employee: Employee) -> None:
+        if employee not in self.employees:
+            self.employees.insert(0, employee)
+        elif self.employees[-1] == employee and len(self.employees) > 1:
+            self.employees.remove(employee)
+            self.employees.insert(0, employee)
 
     def remove_employee(self, employee: Employee) -> None:
         if employee in self.employees:
