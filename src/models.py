@@ -65,3 +65,28 @@ class TimeSlot:
         t1 = self.start_time - 12 if self.start_time > 12 else self.start_time
         t2 = self.end_time - 12 if self.end_time > 12 else self.end_time
         return f"{t1}-{t2}"
+
+
+@dataclass
+class Template:
+    schedule: list[TimeSlot] = field(default_factory=list)
+
+    def generate_locations(self, locations: list[str]) -> dict[str, Location]:
+        return_dict = {}
+        for loc in locations:
+            return_dict[loc] = Location(name=loc.replace("-", " ").title())
+        return return_dict
+
+    def generate_time_slots(
+        self, times: list[tuple[int, int]], locations: list[str]
+    ) -> list[TimeSlot]:
+        return_list = []
+        for tm in times:
+            return_list.append(
+                TimeSlot(
+                    start_time=tm[0],
+                    end_time=tm[1],
+                    locations=self.generate_locations(locations),
+                )
+            )
+        return return_list
