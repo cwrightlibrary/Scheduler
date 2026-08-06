@@ -71,6 +71,7 @@ class TimeSlot:
 class Template:
     schedule: list[TimeSlot] = field(default_factory=list)
     location_names: list[str] = field(init=False)
+    employees: list[Employee] = field(init=False)
 
     def __init__(self, times: list[tuple[int, int]], locations: list[str]) -> None:
         self.schedule = self.generate_time_slots(times, locations)
